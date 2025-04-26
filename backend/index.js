@@ -10,6 +10,7 @@ const customerRoutes = require("./routes/customerRoutes");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const insuranceRoutes = require("./routes/insuranceRoutes");
 const claimRoutes = require("./routes/claimRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const PORT = 5000;
 
@@ -26,6 +27,7 @@ app.use("/api/customer", customerRoutes);
 app.use("/api/vehicle", vehicleRoutes);
 app.use("/api/insurance", insuranceRoutes);
 app.use("/api/claim", claimRoutes);
+app.use("/api/payment", paymentRoutes);
 
 app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message });
