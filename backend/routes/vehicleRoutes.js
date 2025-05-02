@@ -5,8 +5,14 @@ const {
   getAllVehicles,
 } = require("../controllers/vehicleController");
 const authenticate = require("../utils/authenticate");
+const authorizeRole = require("../utils/authorizeRole");
 
 router.post("/newvehicle", authenticate, createVehicle);
-router.get("/allvehicles", authenticate, getAllVehicles);
+router.get(
+  "/allvehicles",
+  authenticate,
+  authorizeRole("admin"),
+  getAllVehicles
+);
 
 module.exports = router;

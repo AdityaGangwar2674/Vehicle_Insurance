@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authenticate = require("../utils/authenticate");
+const authorizeRole = require("../utils/authorizeRole");
 
 const {
   makePayment,
@@ -8,8 +9,13 @@ const {
   getPaymentById,
 } = require("../controllers/paymentController");
 
-router.post("/make", authenticate, makePayment);
-router.get("/all", authenticate, getAllPayments);
+router.post("/makepayment", authenticate, makePayment);
+router.get(
+  "/allpayments",
+  authenticate,
+  authorizeRole("admin"),
+  getAllPayments
+);
 router.get("/:id", authenticate, getPaymentById);
 
 module.exports = router;
