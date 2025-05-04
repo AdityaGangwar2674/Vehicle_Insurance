@@ -113,4 +113,12 @@ const logoutUser = async (req, res) => {
   }
 };
 
-module.exports = { loginUser, registerUser, getAllUsers, logoutUser };
+const getCurrentUser = async (req, res) => {
+  try {
+    res.status(200).json(req.user); // assuming req.user is populated in `authenticate` middleware
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+module.exports = { loginUser, registerUser, getAllUsers, logoutUser, getCurrentUser };
