@@ -2,51 +2,40 @@ const express = require("express");
 const app = express();
 require("dotenv").config();
 const cookieParser = require("cookie-parser");
-const mongoose = require("mongoose");
 const cors = require("cors");
 
-const authRoutes = require("./routes/authRoutes");
-const customerRoutes = require("./routes/customerRoutes");
+const authRoutes = require("./routes/auth.route");
+const customerRoutes = require("./routes/customer.route");
 const vehicleRoutes = require("./routes/vehicleRoutes");
 const insuranceRoutes = require("./routes/insuranceRoutes");
 const claimRoutes = require("./routes/claimRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const connectDB = require("./config/db");
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:3000", // or '*' for all origins
-    credentials: true, // Allow sending cookies with requests
+    origin: "*",
+    credentials: true,
   })
 );
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
-
 app.use("/api/auth", authRoutes);
-app.use("/api/customer", customerRoutes);
+app.use("/api/customers", customerRoutes);
 app.use("/api/vehicle", vehicleRoutes);
 app.use("/api/insurance", insuranceRoutes);
 app.use("/api/claim", claimRoutes);
 app.use("/api/payment", paymentRoutes);
 
-app.use((err, req, res, next) => {
-  res.status(500).json({ message: err.message });
+app.get("/", (req, res) => {
+  res.send("🚗 Vehicle Insurance Management System API");
 });
 
+// Start Server
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  connectDB();
 });
-
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((error) => {
-    console.log(error);
-  });

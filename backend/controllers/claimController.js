@@ -1,4 +1,4 @@
-const Claim = require("../models/ClaimModel");
+const Claim = require("../models/claim.model");
 const Insurance = require("../models/InsuranceModel");
 
 const createClaim = async (req, res) => {
