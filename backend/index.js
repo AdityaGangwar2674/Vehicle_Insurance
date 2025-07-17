@@ -9,7 +9,7 @@ const customerRoutes = require("./routes/customer.route");
 const vehicleRoutes = require("./routes/vehicle.route");
 const insuranceRoutes = require("./routes/insurance.route");
 const claimRoutes = require("./routes/claim.route");
-const paymentRoutes = require("./routes/paymentRoutes");
+const paymentRoutes = require("./routes/payment.route");
 const connectDB = require("./config/db");
 
 const PORT = process.env.PORT || 5000;

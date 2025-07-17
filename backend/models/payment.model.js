@@ -1,33 +1,32 @@
 const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema({
-  customer: {
+  customerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Customer",
     required: true,
   },
-  insurance: {
+  insuranceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Insurance",
     required: true,
   },
-  amount: {
+  amountPaid: {
     type: Number,
+    required: true,
+  },
+  paymentMode: {
+    type: String,
+    enum: ["Cash", "Card", "UPI", "Net Banking"],
+    required: true,
+  },
+  transactionId: {
+    type: String,
     required: true,
   },
   paymentDate: {
     type: Date,
     default: Date.now,
-  },
-  paymentMethod: {
-    type: String,
-    enum: ["Cash", "Card", "NetBanking", "UPI"],
-    required: true,
-  },
-  status: {
-    type: String,
-    enum: ["Success", "Failed", "Pending"],
-    default: "Pending",
   },
 });
 
