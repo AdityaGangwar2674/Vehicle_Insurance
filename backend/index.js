@@ -10,6 +10,7 @@ const vehicleRoutes = require("./routes/vehicle.route");
 const insuranceRoutes = require("./routes/insurance.route");
 const claimRoutes = require("./routes/claim.route");
 const paymentRoutes = require("./routes/payment.route");
+const receiptRoutes = require("./routes/receipt.route");
 const connectDB = require("./config/db");
 
 const PORT = process.env.PORT || 5000;
@@ -29,6 +30,7 @@ app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/insurance", insuranceRoutes);
 app.use("/api/claim", claimRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/receipts", receiptRoutes);
 
 app.use("/uploads", express.static("uploads"));
 
