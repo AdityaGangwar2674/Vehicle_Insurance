@@ -1,5 +1,5 @@
 const Claim = require("../models/claim.model");
-const Insurance = require("../models/InsuranceModel");
+const Insurance = require("../models/insurance.model");
 
 const createClaim = async (req, res) => {
   const { insurance, incidentDate, description, amountClaimed } = req.body;
