@@ -8,7 +8,7 @@ const authRoutes = require("./routes/auth.route");
 const customerRoutes = require("./routes/customer.route");
 const vehicleRoutes = require("./routes/vehicle.route");
 const insuranceRoutes = require("./routes/insurance.route");
-const claimRoutes = require("./routes/claimRoutes");
+const claimRoutes = require("./routes/claim.route");
 const paymentRoutes = require("./routes/paymentRoutes");
 const connectDB = require("./config/db");
 
