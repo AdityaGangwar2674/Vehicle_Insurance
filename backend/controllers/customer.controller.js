@@ -1,38 +1,55 @@
 const Customer = require("../models/customer.model");
 const User = require("../models/user.model");
 
-exports.createOrUpdateProfile = async (req, res) => {
+exports.createProfile = async (req, res) => {
   try {
     const { phone, address } = req.body;
-
     const existing = await Customer.findOne({ userId: req.user._id });
+    if (existing)
+      return res.status(400).json({ message: "Profile already exists" });
 
-    const user = await User.findById(req.user._id);
-
-    const data = {
-      userId: req.user._id,
+    const user = req.user;
+    const customer = await Customer.create({
+      userId: user._id,
       name: user.name,
       email: user.email,
       phone,
       address,
-    };
+    });
 
-    let customer;
-    if (existing) {
-      customer = await Customer.findOneAndUpdate(
-        { userId: req.user._id },
-        data,
-        { new: true }
-      );
-    } else {
-      customer = await Customer.create(data);
-    }
-
-    res.status(200).json({ message: "Customer profile saved", customer });
+    res.status(201).json({ message: "Customer profile created", customer });
   } catch (err) {
     res
       .status(500)
-      .json({ message: "Error saving profile", error: err.message });
+      .json({ message: "Error creating profile", error: err.message });
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { phone, address } = req.body;
+
+    const user = req.user;
+
+    const customer = await Customer.findOneAndUpdate(
+      { userId: user._id },
+      {
+        name: user.name,
+        email: user.email,
+        phone,
+        address,
+      },
+      { new: true }
+    );
+
+    if (!customer)
+      return res.status(404).json({ message: "Customer profile not found" });
+
+    res.status(200).json({ message: "Profile updated", customer });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error updating profile", error: err.message });
   }
 };
 
