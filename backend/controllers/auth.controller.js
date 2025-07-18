@@ -19,12 +19,12 @@ exports.register = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    res
-      .status(201)
-      .json({
-        message: "User registered successfully",
-        user: { name: user.name, email: user.email, role: user.role },
-      });
+    // Return token in response for frontend
+    res.status(201).json({
+      message: "User registered successfully",
+      user: { name: user.name, email: user.email, role: user.role },
+      token, // add token here
+    });
   } catch (err) {
     res
       .status(500)
@@ -49,12 +49,11 @@ exports.login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res
-      .status(200)
-      .json({
-        message: "Login successful",
-        user: { name: user.name, email: user.email, role: user.role },
-      });
+    res.status(200).json({
+      message: "Login successful",
+      user: { name: user.name, email: user.email, role: user.role },
+      token,
+    });
   } catch (err) {
     res.status(500).json({ message: "Login failed", error: err.message });
   }

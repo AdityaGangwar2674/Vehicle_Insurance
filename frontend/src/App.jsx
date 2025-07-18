@@ -12,10 +12,12 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Customers from "./pages/admin/Customers";
 import CustomerClaims from "./pages/admin/CustomerClaims";
 import CustomerPayments from "./pages/admin/CustomerPayments";
+import { AuthProvider } from "./context/AuthContext";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   return (
-    <div className="">
+    <AuthProvider>
       <Router>
         <Routes>
           {/* main page */}
@@ -24,7 +26,14 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           {/* dashboard page */}
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
           <Route path="/claims" element={<Claims />} />
           <Route path="/insurance" element={<Insurance />} />
           <Route path="/payments" element={<Payment />} />
@@ -37,7 +46,7 @@ function App() {
           <Route path="/admin/payments" element={<CustomerPayments />} />
         </Routes>
       </Router>
-    </div>
+    </AuthProvider>
   );
 }
 
