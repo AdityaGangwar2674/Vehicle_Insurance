@@ -1,5 +1,6 @@
 const Claim = require("../models/claim.model");
 const Customer = require("../models/customer.model");
+const { getFullImageUrl } = require("../utils/url.helper");
 
 // Add new claim
 exports.addClaim = async (req, res) => {
@@ -10,14 +11,31 @@ exports.addClaim = async (req, res) => {
 
     const { insuranceId, claimReason, claimAmount } = req.body;
 
-    const claim = await Claim.create({
+    const claimData = {
       insuranceId,
       customerId: customer._id,
       claimReason,
       claimAmount,
-    });
+    };
 
-    res.status(201).json({ message: "Claim submitted successfully", claim });
+    if (req.file) {
+      claimData.accidentImage = req.file.path; // multer stores path
+    }
+
+    const claim = await Claim.create(claimData);
+
+    // Add full URL to accidentImage
+    const claimResponse = claim.toObject();
+    if (claimResponse.accidentImage) {
+      claimResponse.accidentImage = getFullImageUrl(
+        req,
+        claimResponse.accidentImage
+      );
+    }
+
+    res
+      .status(201)
+      .json({ message: "Claim submitted successfully", claim: claimResponse });
   } catch (err) {
     res
       .status(500)
@@ -29,12 +47,19 @@ exports.addClaim = async (req, res) => {
 exports.getMyClaims = async (req, res) => {
   try {
     const customer = await Customer.findOne({ userId: req.user._id });
-
     const claims = await Claim.find({ customerId: customer._id }).populate(
       "insuranceId"
     );
 
-    res.status(200).json(claims);
+    const claimsWithFullUrl = claims.map((c) => {
+      const claimObj = c.toObject();
+      if (claimObj.accidentImage) {
+        claimObj.accidentImage = getFullImageUrl(req, claimObj.accidentImage);
+      }
+      return claimObj;
+    });
+
+    res.status(200).json(claimsWithFullUrl);
   } catch (err) {
     res
       .status(500)
@@ -49,7 +74,15 @@ exports.getAllClaims = async (req, res) => {
       .populate("customerId")
       .populate("insuranceId");
 
-    res.status(200).json(claims);
+    const claimsWithFullUrl = claims.map((c) => {
+      const claimObj = c.toObject();
+      if (claimObj.accidentImage) {
+        claimObj.accidentImage = getFullImageUrl(req, claimObj.accidentImage);
+      }
+      return claimObj;
+    });
+
+    res.status(200).json(claimsWithFullUrl);
   } catch (err) {
     res
       .status(500)
@@ -74,7 +107,17 @@ exports.updateClaimStatus = async (req, res) => {
 
     if (!updated) return res.status(404).json({ message: "Claim not found" });
 
-    res.status(200).json({ message: "Claim status updated", claim: updated });
+    const updatedClaim = updated.toObject();
+    if (updatedClaim.accidentImage) {
+      updatedClaim.accidentImage = getFullImageUrl(
+        req,
+        updatedClaim.accidentImage
+      );
+    }
+
+    res
+      .status(200)
+      .json({ message: "Claim status updated", claim: updatedClaim });
   } catch (err) {
     res
       .status(500)

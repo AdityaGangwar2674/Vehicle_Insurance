@@ -20,6 +20,10 @@ const claimSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    accidentImage: {
+      type: String, // path to uploaded image
+      required: false,
+    },
     claimStatus: {
       type: String,
       enum: ["Pending", "Approved", "Rejected"],

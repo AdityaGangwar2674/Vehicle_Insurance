@@ -1,5 +1,6 @@
 const Vehicle = require("../models/vehicle.model");
 const Customer = require("../models/customer.model");
+const { getFullImageUrl } = require("../utils/url.helper");
 
 exports.addVehicle = async (req, res) => {
   try {
@@ -16,7 +17,7 @@ exports.addVehicle = async (req, res) => {
         .status(400)
         .json({ message: "Vehicle with this registration already exists" });
 
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+    const imagePath = req.file ? `uploads/${req.file.filename}` : null;
 
     const vehicle = await Vehicle.create({
       customerId: customer._id,
@@ -29,7 +30,15 @@ exports.addVehicle = async (req, res) => {
       image: imagePath,
     });
 
-    res.status(201).json({ message: "Vehicle added successfully", vehicle });
+    const vehicleResponse = vehicle.toObject();
+    if (vehicleResponse.image) {
+      vehicleResponse.image = getFullImageUrl(req, vehicleResponse.image);
+    }
+
+    res.status(201).json({
+      message: "Vehicle added successfully",
+      vehicle: vehicleResponse,
+    });
   } catch (err) {
     res
       .status(500)
@@ -44,7 +53,16 @@ exports.getMyVehicles = async (req, res) => {
       return res.status(404).json({ message: "Customer profile not found" });
 
     const vehicles = await Vehicle.find({ customerId: customer._id });
-    res.status(200).json(vehicles);
+
+    const vehiclesWithFullUrl = vehicles.map((v) => {
+      const vehicleObj = v.toObject();
+      if (vehicleObj.image) {
+        vehicleObj.image = getFullImageUrl(req, vehicleObj.image);
+      }
+      return vehicleObj;
+    });
+
+    res.status(200).json(vehiclesWithFullUrl);
   } catch (err) {
     res
       .status(500)
@@ -55,7 +73,16 @@ exports.getMyVehicles = async (req, res) => {
 exports.getAllVehicles = async (req, res) => {
   try {
     const vehicles = await Vehicle.find().populate("customerId");
-    res.status(200).json(vehicles);
+
+    const vehiclesWithFullUrl = vehicles.map((v) => {
+      const vehicleObj = v.toObject();
+      if (vehicleObj.image) {
+        vehicleObj.image = getFullImageUrl(req, vehicleObj.image);
+      }
+      return vehicleObj;
+    });
+
+    res.status(200).json(vehiclesWithFullUrl);
   } catch (err) {
     res
       .status(500)
