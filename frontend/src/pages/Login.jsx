@@ -1,15 +1,17 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import Swal from "sweetalert2";
 import axios from "axios";
 import { motion } from "framer-motion";
-import { Shield } from "lucide-react";
+import { Shield, Moon, Sun, Mail, Lock } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useContext(AuthContext);
+  const { isDark, toggleTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -23,35 +25,77 @@ const Login = () => {
       });
       console.log("✅ Login response:", res.data);
 
-      login(res.data.user, res.data.token); // Token is now included
-      Swal.fire("Success", "Logged in successfully!", "success");
+      login(res.data.user, res.data.token);
+      Swal.fire({
+        title: "Success",
+        text: "Logged in successfully!",
+        icon: "success",
+        background: isDark ? "#1e293b" : "#ffffff",
+        color: isDark ? "#ffffff" : "#000000",
+      });
       navigate("/dashboard");
     } catch (err) {
       setIsLoading(false);
-      Swal.fire(
-        "Error",
-        err.response?.data?.message || "Login failed",
-        "error"
-      );
+      Swal.fire({
+        title: "Error",
+        text: err.response?.data?.message || "Login failed",
+        icon: "error",
+        background: isDark ? "#1e293b" : "#ffffff",
+        color: isDark ? "#ffffff" : "#000000",
+      });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-600/20"></div>
+    <div
+      className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-300 ${
+        isDark
+          ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+          : "bg-gradient-to-br from-blue-50 via-white to-indigo-50"
+      }`}
+    >
+      {/* Theme Toggle */}
+      <motion.button
+        onClick={toggleTheme}
+        className={`fixed top-6 right-6 p-3 rounded-xl transition-all duration-300 z-50 ${
+          isDark
+            ? "bg-slate-800 hover:bg-slate-700 text-yellow-400 border border-slate-700"
+            : "bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-sm"
+        }`}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+      </motion.button>
 
       <motion.div
-        className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-8 w-full max-w-md border border-white/20 shadow-2xl"
+        className={`relative rounded-3xl p-8 w-full max-w-md border transition-all duration-300 ${
+          isDark
+            ? "bg-slate-800 border-slate-700 shadow-2xl shadow-blue-900/20"
+            : "bg-white border-gray-200 shadow-xl"
+        }`}
         initial={{ opacity: 0, y: 20, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.6 }}
       >
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-4">
+          <motion.div
+            className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl mb-4 shadow-lg shadow-blue-500/50"
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.6 }}
+          >
             <Shield className="w-8 h-8 text-white" />
-          </div>
-          <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
-          <p className="text-blue-100">Sign in to your account</p>
+          </motion.div>
+          <h2
+            className={`text-3xl font-bold mb-2 ${
+              isDark ? "text-white" : "text-gray-900"
+            }`}
+          >
+            Welcome Back
+          </h2>
+          <p className={isDark ? "text-slate-400" : "text-gray-600"}>
+            Sign in to your account
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -60,17 +104,32 @@ const Login = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <label className="block text-white text-sm font-medium mb-2">
-              Email
+            <label
+              className={`block text-sm font-medium mb-2 ${
+                isDark ? "text-slate-300" : "text-gray-700"
+              }`}
+            >
+              Email Address
             </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
-              placeholder="Enter your email"
-              required
-            />
+            <div className="relative">
+              <Mail
+                className={`absolute left-3 top-3 w-5 h-5 ${
+                  isDark ? "text-slate-500" : "text-gray-400"
+                }`}
+              />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                  isDark
+                    ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                    : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400"
+                }`}
+                placeholder="Enter your email"
+                required
+              />
+            </div>
           </motion.div>
 
           <motion.div
@@ -78,23 +137,64 @@ const Login = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
-            <label className="block text-white text-sm font-medium mb-2">
+            <label
+              className={`block text-sm font-medium mb-2 ${
+                isDark ? "text-slate-300" : "text-gray-700"
+              }`}
+            >
               Password
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
-              placeholder="Enter your password"
-              required
-            />
+            <div className="relative">
+              <Lock
+                className={`absolute left-3 top-3 w-5 h-5 ${
+                  isDark ? "text-slate-500" : "text-gray-400"
+                }`}
+              />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`w-full pl-10 pr-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                  isDark
+                    ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                    : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400"
+                }`}
+                placeholder="Enter your password"
+                required
+              />
+            </div>
           </motion.div>
+
+          <div className="flex items-center justify-between">
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span
+                className={`ml-2 text-sm ${
+                  isDark ? "text-slate-400" : "text-gray-600"
+                }`}
+              >
+                Remember me
+              </span>
+            </label>
+            <button
+              type="button"
+              className={`text-sm font-medium ${
+                isDark
+                  ? "text-blue-400 hover:text-blue-300"
+                  : "text-blue-600 hover:text-blue-700"
+              }`}
+            >
+              Forgot password?
+            </button>
+          </div>
 
           <motion.button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/50"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             initial={{ opacity: 0 }}
@@ -118,11 +218,15 @@ const Login = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <p className="text-blue-100">
+          <p className={isDark ? "text-slate-400" : "text-gray-600"}>
             Don't have an account?{" "}
             <span
               onClick={() => navigate("/register")}
-              className="text-blue-400 hover:text-blue-300 cursor-pointer font-semibold transition-colors duration-300"
+              className={`font-semibold cursor-pointer transition-colors duration-300 ${
+                isDark
+                  ? "text-blue-400 hover:text-blue-300"
+                  : "text-blue-600 hover:text-blue-700"
+              }`}
             >
               Sign up
             </span>

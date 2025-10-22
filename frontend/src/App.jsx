@@ -13,40 +13,43 @@ import Customers from "./pages/admin/Customers";
 import CustomerClaims from "./pages/admin/CustomerClaims";
 import CustomerPayments from "./pages/admin/CustomerPayments";
 import { AuthProvider } from "./context/AuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* main page */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* main page */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* dashboard page */}
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route path="/claims" element={<Claims />} />
-          <Route path="/insurance" element={<Insurance />} />
-          <Route path="/payments" element={<Payment />} />
-          <Route path="/vehicles" element={<Vehicles />} />
+            {/* dashboard page */}
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/claims" element={<Claims />} />
+            <Route path="/insurance" element={<Insurance />} />
+            <Route path="/payments" element={<Payment />} />
+            <Route path="/vehicles" element={<Vehicles />} />
 
-          {/* admin dashboard */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/customers" element={<Customers />} />
-          <Route path="/admin/claims" element={<CustomerClaims />} />
-          <Route path="/admin/payments" element={<CustomerPayments />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+            {/* admin dashboard */}
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/customers" element={<Customers />} />
+            <Route path="/admin/claims" element={<CustomerClaims />} />
+            <Route path="/admin/payments" element={<CustomerPayments />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
