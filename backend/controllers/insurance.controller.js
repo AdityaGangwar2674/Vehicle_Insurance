@@ -1,12 +1,14 @@
 const Insurance = require("../models/insurance.model");
 const Customer = require("../models/customer.model");
+const apiResponse = require("../utils/apiResponse");
 
 // Add new insurance
 exports.addInsurance = async (req, res) => {
   try {
     const customer = await Customer.findOne({ userId: req.user._id });
-    if (!customer)
-      return res.status(404).json({ message: "Customer not found" });
+    if (!customer) {
+      return apiResponse(res, false, "Customer profile not found", {}, 404);
+    }
 
     const {
       vehicleId,
@@ -19,8 +21,9 @@ exports.addInsurance = async (req, res) => {
     } = req.body;
 
     const exists = await Insurance.findOne({ policyNumber });
-    if (exists)
-      return res.status(400).json({ message: "Policy already exists" });
+    if (exists) {
+      return apiResponse(res, false, "Policy with this number already exists", {}, 400);
+    }
 
     const insurance = await Insurance.create({
       customerId: customer._id,
@@ -33,13 +36,9 @@ exports.addInsurance = async (req, res) => {
       premiumAmount,
     });
 
-    res
-      .status(201)
-      .json({ message: "Insurance added successfully", insurance });
+    return apiResponse(res, true, "Insurance policy created successfully", insurance, 201);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error adding insurance", error: err.message });
+    return apiResponse(res, false, "Error creating insurance", { error: err.message }, 500);
   }
 };
 
@@ -47,65 +46,56 @@ exports.addInsurance = async (req, res) => {
 exports.getMyInsurances = async (req, res) => {
   try {
     const customer = await Customer.findOne({ userId: req.user._id });
-    const insurances = await Insurance.find({
-      customerId: customer._id,
-    }).populate("vehicleId");
-    res.status(200).json(insurances);
+    if (!customer) {
+      return apiResponse(res, false, "Customer profile not found", {}, 404);
+    }
+
+    const insurances = await Insurance.find({ customerId: customer._id }).populate("vehicleId");
+    return apiResponse(res, true, "Your insurance policies fetched successfully", insurances, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching your insurances", error: err.message });
+    return apiResponse(res, false, "Error fetching your insurances", { error: err.message }, 500);
   }
 };
 
 // Admin: Get all insurances
 exports.getAllInsurances = async (req, res) => {
   try {
-    const insurances = await Insurance.find()
-      .populate("vehicleId")
-      .populate("customerId");
-    res.status(200).json(insurances);
+    const insurances = await Insurance.find().populate("vehicleId").populate("customerId");
+    return apiResponse(res, true, "All insurance policies fetched successfully", insurances, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching all insurances", error: err.message });
+    return apiResponse(res, false, "Error fetching all insurances", { error: err.message }, 500);
   }
 };
 
-// Admin: Update insurance by ID (from route param)
+// Admin: Update insurance by ID
 exports.updateInsurance = async (req, res) => {
   try {
     const insuranceId = req.params.id;
     const updateData = req.body;
 
-    const updated = await Insurance.findByIdAndUpdate(insuranceId, updateData, {
-      new: true,
-    });
+    const updated = await Insurance.findByIdAndUpdate(insuranceId, updateData, { new: true });
+    if (!updated) {
+      return apiResponse(res, false, "Insurance policy not found", {}, 404);
+    }
 
-    if (!updated)
-      return res.status(404).json({ message: "Insurance not found" });
-
-    res.status(200).json({ message: "Insurance updated", insurance: updated });
+    return apiResponse(res, true, "Insurance policy updated successfully", updated, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error updating insurance", error: err.message });
+    return apiResponse(res, false, "Error updating insurance", { error: err.message }, 500);
   }
 };
 
-// Admin: Delete insurance by ID (from route param)
+// Admin: Delete insurance by ID
 exports.deleteInsurance = async (req, res) => {
   try {
     const insuranceId = req.params.id;
 
     const deleted = await Insurance.findByIdAndDelete(insuranceId);
-    if (!deleted)
-      return res.status(404).json({ message: "Insurance not found" });
+    if (!deleted) {
+      return apiResponse(res, false, "Insurance policy not found", {}, 404);
+    }
 
-    res.status(200).json({ message: "Insurance deleted" });
+    return apiResponse(res, true, "Insurance policy deleted successfully", {}, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error deleting insurance", error: err.message });
+    return apiResponse(res, false, "Error deleting insurance", { error: err.message }, 500);
   }
 };
