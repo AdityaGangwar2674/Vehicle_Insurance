@@ -2,91 +2,83 @@ const Payment = require("../models/payment.model");
 const Customer = require("../models/customer.model");
 const Insurance = require("../models/insurance.model");
 const mongoose = require("mongoose");
+const Receipt = require("../models/receipt.model");
+const apiResponse = require("../utils/apiResponse");
 
 const generateTransactionId = () => {
   return "TXN" + Math.floor(100000000 + Math.random() * 900000000).toString();
 };
 
+const generateReceiptNumber = () =>
+  `RCT${Math.floor(100000 + Math.random() * 900000)}`;
+
 exports.addPayment = async (req, res) => {
   try {
-    const { customerId, insuranceId, amountPaid, paymentMode } = req.body;
+    const { insuranceId, amountPaid, paymentMode } = req.body;
 
-    if (!customerId || !insuranceId || !amountPaid || !paymentMode) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!insuranceId || !amountPaid || !paymentMode) {
+      return apiResponse(res, false, "All fields are required", {}, 400);
     }
 
-    // Optional: Validate customer & insurance exist
-    const customer = await Customer.findById(customerId);
-    const insurance = await Insurance.findById(insuranceId);
+    const customer = await Customer.findOne({ userId: req.user._id });
+    if (!customer) {
+      return apiResponse(res, false, "Customer profile not found", {}, 404);
+    }
 
-    if (!customer || !insurance) {
-      return res
-        .status(404)
-        .json({ message: "Customer or Insurance not found" });
+    const insurance = await Insurance.findById(insuranceId);
+    if (!insurance) {
+      return apiResponse(res, false, "Insurance policy not found", {}, 404);
     }
 
     const transactionId = generateTransactionId();
-
-    const newPayment = new Payment({
-      customerId,
+    const newPayment = await Payment.create({
+      customerId: customer._id,
       insuranceId,
       amountPaid,
       paymentMode,
       transactionId,
     });
 
-    const savedPayment = await newPayment.save();
+    await Insurance.findByIdAndUpdate(insuranceId, { status: "active" });
 
-    res.status(201).json({
-      message: "Payment added",
-      payment: savedPayment,
+    const receipt = await Receipt.create({
+      customerId: customer._id,
+      paymentId: newPayment._id,
+      receiptNumber: generateReceiptNumber(),
     });
+
+    return apiResponse(
+      res,
+      true,
+      "Payment successful. Insurance is now active and receipt generated.",
+      { payment: newPayment, receipt },
+      201
+    );
   } catch (error) {
-    res.status(500).json({
-      message: "Error adding payment",
-      error: error.message,
-    });
+    return apiResponse(res, false, "Error processing payment", { error: error.message }, 500);
   }
 };
 
 exports.getMyPayments = async (req, res) => {
   try {
-    console.log("🔐 Logged-in user:", req.user);
-
-    const userId = req.user._id;
-    const customer = await Customer.findOne({ userId });
+    const customer = await Customer.findOne({ userId: req.user._id });
 
     if (!customer) {
-      console.log("⚠️ No customer profile found for user", userId);
-      return res.status(404).json({ message: "Customer profile not found." });
+      return apiResponse(res, false, "Customer profile not found", {}, 404);
     }
 
-    console.log("✅ Found customerId:", customer._id);
-
-    const payments = await Payment.find({ customerId: customer._id }).populate(
-      "insuranceId"
-    );
-    console.log(`✅ Found ${payments.length} payments`);
-
-    res.status(200).json(payments);
+    const payments = await Payment.find({ customerId: customer._id }).populate("insuranceId");
+    return apiResponse(res, true, "Payments fetched successfully", payments, 200);
   } catch (err) {
-    console.error("❌ Error in getMyPayments:", err);
-    res
-      .status(500)
-      .json({ message: "Error fetching payments", error: err.message });
+    return apiResponse(res, false, "Error fetching payments", { error: err.message }, 500);
   }
 };
 
 exports.getAllPayments = async (req, res) => {
   try {
-    const payments = await Payment.find()
-      .populate("customerId")
-      .populate("insuranceId");
-
-    res.status(200).json(payments);
+    const payments = await Payment.find().populate("customerId").populate("insuranceId");
+    return apiResponse(res, true, "All payments fetched successfully", payments, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching payments", error: err.message });
+    return apiResponse(res, false, "Error fetching payments", { error: err.message }, 500);
   }
 };
