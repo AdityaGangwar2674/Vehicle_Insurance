@@ -1,39 +1,43 @@
 import { createContext, useEffect, useState } from "react";
+import api from "../api/axios";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user")) || null
-  );
-  const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  
+  const [loading, setLoading] = useState(false);
 
+  // Sync with localStorage
   useEffect(() => {
-    console.log("🔑 Token changed:", token);
-    if (token) {
-      localStorage.setItem("token", token);
-      if (user) localStorage.setItem("user", JSON.stringify(user));
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
     } else {
-      localStorage.removeItem("token");
       localStorage.removeItem("user");
+      // Token is in cookie, so we don't handle it here
     }
-  }, [token, user]);
+  }, [user]);
 
-  const login = (userData, jwtToken) => {
-    console.log("👤 Login called with token:", jwtToken);
+  const login = (userData) => {
     setUser(userData);
-    setToken(jwtToken);
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken("");
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+  const logout = async () => {
+    try {
+      await api.get("/auth/logout");
+    } catch (err) {
+      console.error("Logout from server failed:", err);
+    } finally {
+      setUser(null);
+      localStorage.removeItem("user");
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, setLoading }}>
       {children}
     </AuthContext.Provider>
   );
