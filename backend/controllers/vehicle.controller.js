@@ -1,21 +1,21 @@
 const Vehicle = require("../models/vehicle.model");
 const Customer = require("../models/customer.model");
 const { getFullImageUrl } = require("../utils/url.helper");
+const apiResponse = require("../utils/apiResponse");
 
 exports.addVehicle = async (req, res) => {
   try {
     const customer = await Customer.findOne({ userId: req.user._id });
-    if (!customer)
-      return res.status(400).json({ message: "Customer profile not found" });
+    if (!customer) {
+      return apiResponse(res, false, "Customer profile not found", {}, 404);
+    }
 
-    const { registrationNumber, brand, model, type, manufactureYear } =
-      req.body;
+    const { registrationNumber, brand, model, type, manufactureYear } = req.body;
 
     const existing = await Vehicle.findOne({ registrationNumber });
-    if (existing)
-      return res
-        .status(400)
-        .json({ message: "Vehicle with this registration already exists" });
+    if (existing) {
+      return apiResponse(res, false, "Vehicle with this registration already exists", {}, 400);
+    }
 
     const imagePath = req.file ? `uploads/${req.file.filename}` : null;
 
@@ -35,22 +35,18 @@ exports.addVehicle = async (req, res) => {
       vehicleResponse.image = getFullImageUrl(req, vehicleResponse.image);
     }
 
-    res.status(201).json({
-      message: "Vehicle added successfully",
-      vehicle: vehicleResponse,
-    });
+    return apiResponse(res, true, "Vehicle added successfully", vehicleResponse, 201);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error adding vehicle", error: err.message });
+    return apiResponse(res, false, "Error adding vehicle", { error: err.message }, 500);
   }
 };
 
 exports.getMyVehicles = async (req, res) => {
   try {
     const customer = await Customer.findOne({ userId: req.user._id });
-    if (!customer)
-      return res.status(404).json({ message: "Customer profile not found" });
+    if (!customer) {
+      return apiResponse(res, false, "Customer profile not found", {}, 404);
+    }
 
     const vehicles = await Vehicle.find({ customerId: customer._id });
 
@@ -62,11 +58,9 @@ exports.getMyVehicles = async (req, res) => {
       return vehicleObj;
     });
 
-    res.status(200).json(vehiclesWithFullUrl);
+    return apiResponse(res, true, "Vehicles fetched successfully", vehiclesWithFullUrl, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching vehicles", error: err.message });
+    return apiResponse(res, false, "Error fetching vehicles", { error: err.message }, 500);
   }
 };
 
@@ -82,10 +76,8 @@ exports.getAllVehicles = async (req, res) => {
       return vehicleObj;
     });
 
-    res.status(200).json(vehiclesWithFullUrl);
+    return apiResponse(res, true, "All vehicles fetched successfully", vehiclesWithFullUrl, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching all vehicles", error: err.message });
+    return apiResponse(res, false, "Error fetching all vehicles", { error: err.message }, 500);
   }
 };
