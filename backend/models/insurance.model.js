@@ -40,8 +40,8 @@ const insuranceSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "expired", "cancelled"],
-      default: "active",
+      enum: ["pending payment", "active", "expired", "cancelled"],
+      default: "pending payment",
     },
   },
   { timestamps: true }
