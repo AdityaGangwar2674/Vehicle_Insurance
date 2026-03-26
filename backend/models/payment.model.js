@@ -17,7 +17,7 @@ const paymentSchema = new mongoose.Schema({
   },
   paymentMode: {
     type: String,
-    enum: ["Cash", "Card", "UPI", "Net Banking"],
+    enum: ["Cash", "Card", "UPI", "Net Banking", "cash", "card", "upi", "wallet", "netbanking"],
     required: true,
   },
   transactionId: {
