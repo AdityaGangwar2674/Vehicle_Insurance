@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const generateToken = require("../utils/generateToken");
+const apiResponse = require("../utils/apiResponse");
 
 // Register
 exports.register = async (req, res) => {
@@ -7,8 +8,9 @@ exports.register = async (req, res) => {
 
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return res.status(400).json({ message: "User already exists" });
+    if (existingUser) {
+      return apiResponse(res, false, "User already exists", {}, 400);
+    }
 
     const user = await User.create({ name, email, password, role });
 
@@ -16,19 +18,18 @@ exports.register = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
-    // Return token in response for frontend
-    res.status(201).json({
-      message: "User registered successfully",
-      user: { name: user.name, email: user.email, role: user.role },
-      token, // add token here
-    });
+    return apiResponse(
+      res,
+      true,
+      "User registered successfully",
+      { user: { name: user.name, email: user.email, role: user.role }, token },
+      201
+    );
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Registration failed", error: err.message });
+    return apiResponse(res, false, "Registration failed", { error: err.message }, 500);
   }
 };
 
@@ -39,7 +40,7 @@ exports.login = async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user || !(await user.matchPassword(password))) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return apiResponse(res, false, "Invalid credentials", {}, 401);
     }
 
     const token = generateToken(user._id);
@@ -49,30 +50,30 @@ exports.login = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({
-      message: "Login successful",
-      user: { name: user.name, email: user.email, role: user.role },
-      token,
-    });
+    return apiResponse(
+      res,
+      true,
+      "Login successful",
+      { user: { name: user.name, email: user.email, role: user.role }, token },
+      200
+    );
   } catch (err) {
-    res.status(500).json({ message: "Login failed", error: err.message });
+    return apiResponse(res, false, "Login failed", { error: err.message }, 500);
   }
 };
 
 // Logout
 exports.logout = (req, res) => {
   res.clearCookie("token");
-  res.status(200).json({ message: "Logout successful" });
+  return apiResponse(res, true, "Logout successful", {}, 200);
 };
 
 // Get all users (admin only)
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
-    res.status(200).json(users);
+    return apiResponse(res, true, "Users fetched successfully", users, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch users", error: err.message });
+    return apiResponse(res, false, "Failed to fetch users", { error: err.message }, 500);
   }
 };
