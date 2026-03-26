@@ -1,12 +1,14 @@
 const Customer = require("../models/customer.model");
 const User = require("../models/user.model");
+const apiResponse = require("../utils/apiResponse");
 
 exports.createProfile = async (req, res) => {
   try {
     const { phone, address } = req.body;
     const existing = await Customer.findOne({ userId: req.user._id });
-    if (existing)
-      return res.status(400).json({ message: "Profile already exists" });
+    if (existing) {
+      return apiResponse(res, false, "Profile already exists", {}, 400);
+    }
 
     const user = req.user;
     const customer = await Customer.create({
@@ -17,18 +19,15 @@ exports.createProfile = async (req, res) => {
       address,
     });
 
-    res.status(201).json({ message: "Customer profile created", customer });
+    return apiResponse(res, true, "Customer profile created successfully", customer, 201);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error creating profile", error: err.message });
+    return apiResponse(res, false, "Error creating profile", { error: err.message }, 500);
   }
 };
 
 exports.updateProfile = async (req, res) => {
   try {
     const { phone, address } = req.body;
-
     const user = req.user;
 
     const customer = await Customer.findOneAndUpdate(
@@ -42,40 +41,33 @@ exports.updateProfile = async (req, res) => {
       { new: true }
     );
 
-    if (!customer)
-      return res.status(404).json({ message: "Customer profile not found" });
+    if (!customer) {
+      return apiResponse(res, false, "Customer profile not found", {}, 404);
+    }
 
-    res.status(200).json({ message: "Profile updated", customer });
+    return apiResponse(res, true, "Profile updated successfully", customer, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error updating profile", error: err.message });
+    return apiResponse(res, false, "Error updating profile", { error: err.message }, 500);
   }
 };
 
 exports.getMyProfile = async (req, res) => {
   try {
     const customer = await Customer.findOne({ userId: req.user._id });
-    if (!customer)
-      return res.status(404).json({ message: "Profile not found" });
-    res.status(200).json(customer);
+    if (!customer) {
+      return apiResponse(res, false, "Profile not found", {}, 404);
+    }
+    return apiResponse(res, true, "Profile fetched successfully", customer, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching profile", error: err.message });
+    return apiResponse(res, false, "Error fetching profile", { error: err.message }, 500);
   }
 };
 
 exports.getAllCustomers = async (req, res) => {
   try {
-    const customers = await Customer.find().populate(
-      "userId",
-      "name email role"
-    );
-    res.status(200).json(customers);
+    const customers = await Customer.find().populate("userId", "name email role");
+    return apiResponse(res, true, "Customers fetched successfully", customers, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching customers", error: err.message });
+    return apiResponse(res, false, "Error fetching customers", { error: err.message }, 500);
   }
 };
