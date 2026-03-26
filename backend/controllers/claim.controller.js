@@ -1,45 +1,55 @@
 const Claim = require("../models/claim.model");
 const Customer = require("../models/customer.model");
 const { getFullImageUrl } = require("../utils/url.helper");
+const Insurance = require("../models/insurance.model");
+const apiResponse = require("../utils/apiResponse");
 
 // Add new claim
 exports.addClaim = async (req, res) => {
   try {
     const customer = await Customer.findOne({ userId: req.user._id });
-    if (!customer)
-      return res.status(404).json({ message: "Customer not found" });
+    if (!customer) {
+      return apiResponse(res, false, "Customer profile not found", {}, 404);
+    }
 
     const { insuranceId, claimReason, claimAmount } = req.body;
 
-    const claimData = {
+    // Workflow Validation: Check if insurance is active before allowing claim
+    const insurance = await Insurance.findById(insuranceId);
+    if (!insurance) {
+      return apiResponse(res, false, "Insurance record not found", {}, 404);
+    }
+
+    if (insurance.status !== "active") {
+      return apiResponse(
+        res,
+        false,
+        "Claims can only be filed against active insurance policies.",
+        { currentStatus: insurance.status },
+        400
+      );
+    }
+
+    // Unify Image Handling: Prefer relative path for portability
+    const imagePath = req.file ? `uploads/${req.file.filename}` : null;
+
+    const claim = await Claim.create({
       insuranceId,
       customerId: customer._id,
       claimReason,
       claimAmount,
-    };
+      accidentImage: imagePath,
+    });
 
-    if (req.file) {
-      claimData.accidentImage = req.file.path; // multer stores path
-    }
-
-    const claim = await Claim.create(claimData);
-
-    // Add full URL to accidentImage
+    // Add full URL to response for immediate UI update
     const claimResponse = claim.toObject();
     if (claimResponse.accidentImage) {
-      claimResponse.accidentImage = getFullImageUrl(
-        req,
-        claimResponse.accidentImage
-      );
+      claimResponse.accidentImage = getFullImageUrl(req, claimResponse.accidentImage);
     }
 
-    res
-      .status(201)
-      .json({ message: "Claim submitted successfully", claim: claimResponse });
+    return apiResponse(res, true, "Claim submitted successfully and is pending review.", claimResponse, 201);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error submitting claim", error: err.message });
+    return apiResponse(res, false, "Error submitting claim", { error: err.message }, 500);
   }
 };
 
@@ -47,9 +57,11 @@ exports.addClaim = async (req, res) => {
 exports.getMyClaims = async (req, res) => {
   try {
     const customer = await Customer.findOne({ userId: req.user._id });
-    const claims = await Claim.find({ customerId: customer._id }).populate(
-      "insuranceId"
-    );
+    if (!customer) {
+      return apiResponse(res, false, "Customer profile not found", {}, 404);
+    }
+
+    const claims = await Claim.find({ customerId: customer._id }).populate("insuranceId");
 
     const claimsWithFullUrl = claims.map((c) => {
       const claimObj = c.toObject();
@@ -59,20 +71,16 @@ exports.getMyClaims = async (req, res) => {
       return claimObj;
     });
 
-    res.status(200).json(claimsWithFullUrl);
+    return apiResponse(res, true, "Your claims fetched successfully", claimsWithFullUrl, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching your claims", error: err.message });
+    return apiResponse(res, false, "Error fetching your claims", { error: err.message }, 500);
   }
 };
 
 // Admin: Get all claims
 exports.getAllClaims = async (req, res) => {
   try {
-    const claims = await Claim.find()
-      .populate("customerId")
-      .populate("insuranceId");
+    const claims = await Claim.find().populate("customerId").populate("insuranceId");
 
     const claimsWithFullUrl = claims.map((c) => {
       const claimObj = c.toObject();
@@ -82,11 +90,9 @@ exports.getAllClaims = async (req, res) => {
       return claimObj;
     });
 
-    res.status(200).json(claimsWithFullUrl);
+    return apiResponse(res, true, "All claims fetched successfully", claimsWithFullUrl, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error fetching claims", error: err.message });
+    return apiResponse(res, false, "Error fetching claims", { error: err.message }, 500);
   }
 };
 
@@ -96,31 +102,22 @@ exports.updateClaimStatus = async (req, res) => {
     const claimId = req.params.id;
     const { claimStatus } = req.body;
 
-    if (!["Pending", "Approved", "Rejected"].includes(claimStatus))
-      return res.status(400).json({ message: "Invalid claim status" });
+    if (!["Pending", "Approved", "Rejected"].includes(claimStatus)) {
+      return apiResponse(res, false, "Invalid claim status", { allowed: ["Pending", "Approved", "Rejected"] }, 400);
+    }
 
-    const updated = await Claim.findByIdAndUpdate(
-      claimId,
-      { claimStatus },
-      { new: true }
-    );
-
-    if (!updated) return res.status(404).json({ message: "Claim not found" });
+    const updated = await Claim.findByIdAndUpdate(claimId, { claimStatus }, { new: true });
+    if (!updated) {
+      return apiResponse(res, false, "Claim not found", {}, 404);
+    }
 
     const updatedClaim = updated.toObject();
     if (updatedClaim.accidentImage) {
-      updatedClaim.accidentImage = getFullImageUrl(
-        req,
-        updatedClaim.accidentImage
-      );
+      updatedClaim.accidentImage = getFullImageUrl(req, updatedClaim.accidentImage);
     }
 
-    res
-      .status(200)
-      .json({ message: "Claim status updated", claim: updatedClaim });
+    return apiResponse(res, true, "Claim status updated successfully", updatedClaim, 200);
   } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Error updating claim", error: err.message });
+    return apiResponse(res, false, "Error updating claim", { error: err.message }, 500);
   }
 };
