@@ -45,7 +45,6 @@ const Login = () => {
           color: "#fff",
         });
 
-        // Redirect based on role
         if (response.data.user.role === "admin") {
           navigate("/admin/dashboard");
         } else {
@@ -72,19 +71,14 @@ const Login = () => {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-[450px]"
       >
-        <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-500 to-rose-500 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform duration-300">
-              <ShieldCheck className="text-white" size={28} />
-            </div>
-          </Link>
+        <div className="text-center mb-6">
           <h1 className="text-3xl font-bold mb-3">Welcome Back</h1>
           <p className="text-slate-400">Secure access to your insurance dashboard</p>
         </div>
 
         <div className="glass-card p-8 sm:p-10">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {error && (
                 <motion.div 
                   initial={{ opacity: 0, height: 0 }}
@@ -117,7 +111,6 @@ const Login = () => {
             <div className="space-y-2">
               <div className="flex justify-between px-1">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Password</label>
-                <a href="/" className="text-xs text-orange-500 hover:text-orange-400 transition-colors">Forgot?</a>
               </div>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-orange-500 transition-colors" size={20} />
