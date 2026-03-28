@@ -16,9 +16,9 @@ import Swal from "sweetalert2";
 
 const ClaimStatusBadge = ({ status }) => {
   const styles = {
-    pending: "bg-orange-500/10 text-orange-500 border-orange-500/20",
-    approved: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-    rejected: "bg-rose-500/10 text-rose-500 border-rose-500/20",
+    Pending: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+    Approved: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+    Rejected: "bg-rose-500/10 text-rose-500 border-rose-500/20",
   };
   return (
     <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${styles[status]}`}>
