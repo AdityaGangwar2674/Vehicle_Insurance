@@ -89,6 +89,7 @@ const Layout = ({ children }) => {
   const menuItems = isAdmin ? [
     { icon: LayoutDashboard, label: "Admin Panel", path: "/admin/dashboard" },
     { icon: UserIcon, label: "Customers", path: "/admin/customers" },
+    { icon: ShieldCheck, label: "Manage Policies", path: "/admin/insurance" },
     { icon: AlertTriangle, label: "Manage Claims", path: "/admin/claims" },
     { icon: CreditCard, label: "All Payments", path: "/admin/payments" },
   ] : [
