@@ -5,9 +5,16 @@ const apiResponse = require("../utils/apiResponse");
 // Add new insurance
 exports.addInsurance = async (req, res) => {
   try {
-    const customer = await Customer.findOne({ userId: req.user._id });
-    if (!customer) {
-      return apiResponse(res, false, "Customer profile not found", {}, 404);
+    let customerId;
+
+    if (req.user.role === "admin" && req.body.customerId) {
+      customerId = req.body.customerId;
+    } else {
+      const customer = await Customer.findOne({ userId: req.user._id });
+      if (!customer) {
+        return apiResponse(res, false, "Customer profile not found", {}, 404);
+      }
+      customerId = customer._id;
     }
 
     const {
@@ -26,7 +33,7 @@ exports.addInsurance = async (req, res) => {
     }
 
     const insurance = await Insurance.create({
-      customerId: customer._id,
+      customerId,
       vehicleId,
       insuranceType,
       insuranceProvider,
