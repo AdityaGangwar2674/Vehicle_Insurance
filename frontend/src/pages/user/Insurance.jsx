@@ -27,6 +27,46 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+const INSURANCE_PLANS = {
+  comprehensive: {
+    premium: 12500,
+    benefits: [
+      "24/7 Roadside Assistance",
+      "Cashless Repairs at 5000+ garages",
+      "Third Party Liability Coverage",
+      "Natural Disaster Protection",
+      "Zero Depreciation Add-on"
+    ]
+  },
+  "third-party": {
+    premium: 4200,
+    benefits: [
+      "Mandatory Liability Guard",
+      "Legal Defense Costs Coverage",
+      "Unlimited Injury Liability",
+      "Property Damage up to ₹7.5L"
+    ]
+  },
+  "own damage": {
+    premium: 8800,
+    benefits: [
+      "Accidental Internal Loss Shield",
+      "Fire & Theft Security",
+      "Animal Impact Protection",
+      "Vandalism & Riots Cover"
+    ]
+  },
+  "personal accident": {
+    premium: 2100,
+    benefits: [
+      "Driver Accidental Injury Cover",
+      "Child Seat Protection",
+      "Hospital Cashless Daily Allowance",
+      "Passenger Shield Add-on"
+    ]
+  }
+};
+
 const Insurance = () => {
   const [insurances, setInsurances] = useState([]);
   const [vehicles, setVehicles] = useState([]);
@@ -40,8 +80,16 @@ const Insurance = () => {
     insuranceProvider: "SecureInsure Global",
     startDate: new Date().toISOString().split("T")[0],
     endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
-    premiumAmount: 12000,
+    premiumAmount: INSURANCE_PLANS.comprehensive.premium,
   });
+
+  const updateType = (type) => {
+    setFormData({
+      ...formData,
+      insuranceType: type,
+      premiumAmount: INSURANCE_PLANS[type].premium
+    });
+  };
 
   const fetchData = async () => {
     try {
@@ -138,14 +186,28 @@ const Insurance = () => {
                     </p>
                   </div>
 
+                  <div className="space-y-3 pt-2">
+                    <div className="flex justify-between items-end">
+                       <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest italic">Coverage Utilization</span>
+                       <span className="text-[10px] font-black text-white italic">₹{policy.remainingBenefit || policy.premiumAmount} / ₹{policy.totalCoverage || policy.premiumAmount}</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden border border-white/10">
+                       <motion.div 
+                         initial={{ width: 0 }}
+                         animate={{ width: `${((policy.remainingBenefit || policy.premiumAmount) / (policy.totalCoverage || policy.premiumAmount)) * 100}%` }}
+                         className="h-full bg-gradient-to-r from-orange-500 to-rose-500 shadow-lg shadow-orange-500/20"
+                       />
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
                     <div>
                       <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Insurance Type</p>
                       <p className="text-sm font-semibold text-slate-200 capitalize">{policy.insuranceType}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Annual Premium</p>
-                      <p className="text-sm font-semibold text-orange-500">₹{policy.premiumAmount}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest mb-1 italic text-emerald-500">Premium Paid</p>
+                      <p className="text-sm font-semibold text-white">₹{policy.premiumAmount}</p>
                     </div>
                   </div>
 
@@ -230,17 +292,17 @@ const Insurance = () => {
                   <div className="space-y-4">
                     <label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] px-1">Coverage Type</label>
                     <div className="space-y-2">
-                      {["comprehensive", "third-party", "own damage", "personal accident"].map(type => (
+                      {Object.keys(INSURANCE_PLANS).map(type => (
                         <div 
                           key={type}
-                          onClick={() => setFormData({...formData, insuranceType: type})}
+                          onClick={() => updateType(type)}
                           className={`px-4 py-3 rounded-xl border text-sm font-bold capitalize transition-all cursor-pointer ${
                             formData.insuranceType === type 
                               ? "bg-white text-slate-950 border-white" 
                               : "bg-transparent border-white/10 text-slate-400 hover:border-white/25"
                           }`}
                         >
-                          {type.replace("-", " ")}
+                          {type}
                         </div>
                       ))}
                     </div>
@@ -253,9 +315,11 @@ const Insurance = () => {
                         <span className="text-2xl font-black text-white italic">₹{formData.premiumAmount}</span>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-[10px] font-medium text-slate-500 flex items-center gap-2"><CheckCircle2 size={12} className="text-emerald-500" /> 24/7 Roadside Assistance</p>
-                        <p className="text-[10px] font-medium text-slate-500 flex items-center gap-2"><CheckCircle2 size={12} className="text-emerald-500" /> Cashless Repairs</p>
-                        <p className="text-[10px] font-medium text-slate-500 flex items-center gap-2"><CheckCircle2 size={12} className="text-emerald-500" /> Third Party Liability Coverage</p>
+                        {INSURANCE_PLANS[formData.insuranceType].benefits.map((benefit, i) => (
+                          <p key={i} className="text-[10px] font-medium text-slate-500 flex items-center gap-2">
+                            <CheckCircle2 size={12} className="text-emerald-500" /> {benefit}
+                          </p>
+                        ))}
                       </div>
                     </div>
                     <button type="submit" className="btn-primary w-full py-5 flex items-center justify-center gap-3 text-lg">
