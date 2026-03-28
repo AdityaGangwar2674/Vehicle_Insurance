@@ -112,11 +112,11 @@ const Customers = () => {
                       <div className="flex items-center justify-center gap-6">
                         <div className="flex flex-col items-center">
                            <Car size={16} className="text-orange-500 mb-1" />
-                           <span className="text-xs font-black text-white italic">0</span>
+                           <span className="text-xs font-black text-white italic">{u.vehicleCount || 0}</span>
                         </div>
                         <div className="flex flex-col items-center">
                            <ShieldCheck size={16} className="text-emerald-500 mb-1" />
-                           <span className="text-xs font-black text-white italic">0</span>
+                           <span className="text-xs font-black text-white italic">{u.policyCount || 0}</span>
                         </div>
                       </div>
                     </td>
