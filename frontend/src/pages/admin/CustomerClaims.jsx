@@ -97,7 +97,7 @@ const CustomerClaims = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: idx * 0.1 }}
               className={`glass-card relative overflow-hidden group border-white/5 ${
-                claim.claimStatus === "pending"
+                claim.claimStatus === "Pending"
                   ? "hover:border-rose-500/30"
                   : "hover:border-indigo-500/30"
               }`}
@@ -105,9 +105,9 @@ const CustomerClaims = () => {
               <div className="absolute top-0 right-0 p-6 flex items-center gap-4">
                 <span
                   className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
-                    claim.claimStatus === "pending"
+                    claim.claimStatus === "Pending"
                       ? "bg-orange-500/10 text-orange-500 border-orange-500/20"
-                      : claim.claimStatus === "approved"
+                      : claim.claimStatus === "Approved"
                         ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
                         : "bg-rose-500/10 text-rose-500 border-rose-500/20"
                   }`}
@@ -168,11 +168,11 @@ const CustomerClaims = () => {
                       </span>
                     </div>
 
-                    {claim.claimStatus === "pending" && (
+                    {claim.claimStatus === "Pending" && (
                       <div className="flex-1 flex gap-3 ml-auto">
                         <button
                           onClick={() =>
-                            handleUpdateStatus(claim._id, "approved")
+                            handleUpdateStatus(claim._id, "Approved")
                           }
                           className="flex-1 py-3 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-emerald-500 hover:text-white transition-all shadow-xl shadow-emerald-500/5 group/btn"
                         >
@@ -184,7 +184,7 @@ const CustomerClaims = () => {
                         </button>
                         <button
                           onClick={() =>
-                            handleUpdateStatus(claim._id, "rejected")
+                            handleUpdateStatus(claim._id, "Rejected")
                           }
                           className="flex-1 py-3 bg-rose-500/10 text-rose-500 border border-rose-500/20 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-rose-500 hover:text-white transition-all shadow-xl shadow-rose-500/5 group/btn"
                         >
