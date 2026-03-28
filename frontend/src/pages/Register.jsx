@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import api from "../api/axios";
 import {
-  ShieldCheck,
   User as UserIcon,
   Mail,
   Lock,
@@ -13,36 +12,6 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
-
-const RoleCard = ({ selected, icon: Icon, label, desc, onClick }) => (
-  <motion.div
-    whileTap={{ scale: 0.98 }}
-    onClick={onClick}
-    className={`p-4 rounded-2xl border-2 transition-all cursor-pointer flex-1 group ${
-      selected
-        ? "border-orange-500 bg-orange-500/5 shadow-lg shadow-orange-500/10"
-        : "border-white/5 bg-white/5 hover:border-white/20"
-    }`}
-  >
-    <div
-      className={`w-10 h-10 rounded-xl mb-4 flex items-center justify-center transition-colors ${
-        selected
-          ? "bg-orange-500 text-white"
-          : "bg-white/5 text-slate-500 group-hover:text-slate-300"
-      }`}
-    >
-      <Icon size={20} />
-    </div>
-    <h3
-      className={`text-sm font-bold mb-1 ${selected ? "text-white" : "text-slate-400 group-hover:text-slate-300"}`}
-    >
-      {label}
-    </h3>
-    <p className="text-[10px] text-slate-500 leading-tight uppercase font-medium tracking-wider">
-      {desc}
-    </p>
-  </motion.div>
-);
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -105,12 +74,7 @@ const Register = () => {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-[500px]"
       >
-        <div className="text-center mb-10">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8 group">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-500 to-rose-500 flex items-center justify-center shadow-lg shadow-orange-500/20 group-hover:scale-110 transition-transform duration-300 font-bold italic text-white text-xl">
-              VI
-            </div>
-          </Link>
+        <div className="text-center mb-3">
           <h1 className="text-3xl font-bold mb-3">Join the Future</h1>
           <p className="text-slate-400">
             Protect your journey with smart insurance
@@ -132,28 +96,6 @@ const Register = () => {
                 </motion.div>
               )}
             </AnimatePresence>
-
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest px-1">
-                Choose Your Role
-              </label>
-              <div className="flex gap-4">
-                <RoleCard
-                  selected={formData.role === "user"}
-                  icon={UserIcon}
-                  label="Customer"
-                  desc="Manage My Portfolio"
-                  onClick={() => setFormData({ ...formData, role: "user" })}
-                />
-                <RoleCard
-                  selected={formData.role === "admin"}
-                  icon={ShieldCheck}
-                  label="Admin"
-                  desc="System Oversight"
-                  onClick={() => setFormData({ ...formData, role: "admin" })}
-                />
-              </div>
-            </div>
 
             <div className="space-y-4">
               <div className="space-y-2">
