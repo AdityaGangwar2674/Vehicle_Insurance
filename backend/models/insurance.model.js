@@ -38,6 +38,16 @@ const insuranceSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    totalCoverage: {
+      type: Number,
+      required: true,
+      default: function() { return this.premiumAmount; }
+    },
+    remainingBenefit: {
+      type: Number,
+      required: true,
+      default: function() { return this.premiumAmount; }
+    },
     status: {
       type: String,
       enum: ["pending payment", "active", "expired", "cancelled"],
