@@ -9,6 +9,7 @@ import Payment from "./pages/user/Payment";
 import Vehicles from "./pages/user/Vehicles";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Customers from "./pages/admin/Customers";
+import AdminInsurances from "./pages/admin/AdminInsurances";
 import CustomerClaims from "./pages/admin/CustomerClaims";
 import CustomerPayments from "./pages/admin/CustomerPayments";
 import { AuthProvider } from "./context/AuthContext";
@@ -41,6 +42,7 @@ function App() {
           {/* Admin Routes */}
           <Route path="/admin/dashboard" element={<ProtectedPage adminOnly><AdminDashboard /></ProtectedPage>} />
           <Route path="/admin/customers" element={<ProtectedPage adminOnly><Customers /></ProtectedPage>} />
+          <Route path="/admin/insurance" element={<ProtectedPage adminOnly><AdminInsurances /></ProtectedPage>} />
           <Route path="/admin/claims" element={<ProtectedPage adminOnly><CustomerClaims /></ProtectedPage>} />
           <Route path="/admin/payments" element={<ProtectedPage adminOnly><CustomerPayments /></ProtectedPage>} />
 
