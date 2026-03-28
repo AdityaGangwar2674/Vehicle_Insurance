@@ -47,3 +47,18 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-600;
 }
+
+@media print {
+  @page {
+    margin: 0;
+    size: auto;
+  }
+  body {
+    margin: 0;
+    padding: 0;
+    -webkit-print-color-adjust: exact;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
