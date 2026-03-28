@@ -106,12 +106,24 @@ exports.updateClaimStatus = async (req, res) => {
       return apiResponse(res, false, "Invalid claim status", { allowed: ["Pending", "Approved", "Rejected"] }, 400);
     }
 
-    const updated = await Claim.findByIdAndUpdate(claimId, { claimStatus }, { new: true });
-    if (!updated) {
+    const currentClaim = await Claim.findById(claimId);
+    if (!currentClaim) {
       return apiResponse(res, false, "Claim not found", {}, 404);
     }
 
+    // Logic: If claim is moving from Pending -> Approved, deduct from policy's remainingBenefit
+    if (claimStatus === "Approved" && currentClaim.claimStatus === "Pending") {
+      const insurance = await Insurance.findById(currentClaim.insuranceId);
+      if (insurance) {
+        insurance.remainingBenefit = Math.max(0, insurance.remainingBenefit - currentClaim.claimAmount);
+        await insurance.save();
+      }
+    }
+
+    currentClaim.claimStatus = claimStatus;
+    const updated = await currentClaim.save();
     const updatedClaim = updated.toObject();
+
     if (updatedClaim.accidentImage) {
       updatedClaim.accidentImage = getFullImageUrl(req, updatedClaim.accidentImage);
     }
