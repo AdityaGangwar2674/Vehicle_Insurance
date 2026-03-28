@@ -68,10 +68,30 @@ exports.logout = (req, res) => {
   return apiResponse(res, true, "Logout successful", {}, 200);
 };
 
+const Vehicle = require("../models/vehicle.model");
+const Insurance = require("../models/insurance.model");
+const Customer = require("../models/customer.model");
+
 // Get all users (admin only)
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    const rawUsers = await User.find().select("-password").lean();
+    
+    // Enrich with counts
+    const users = await Promise.all(rawUsers.map(async (user) => {
+      const customer = await Customer.findOne({ userId: user._id });
+      if (!customer) return { ...user, vehicleCount: 0, policyCount: 0 };
+
+      const vehicleCount = await Vehicle.countDocuments({ customerId: customer._id });
+      const policyCount = await Insurance.countDocuments({ customerId: customer._id });
+
+      return {
+        ...user,
+        vehicleCount,
+        policyCount
+      };
+    }));
+
     return apiResponse(res, true, "Users fetched successfully", users, 200);
   } catch (err) {
     return apiResponse(res, false, "Failed to fetch users", { error: err.message }, 500);
